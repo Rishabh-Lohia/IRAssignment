@@ -4,6 +4,9 @@ import java.util.LinkedList;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
@@ -27,7 +30,7 @@ public StanfordLemmatizer() {
     // (required for lemmatization), and lemmatization
     Properties props;
     props = new Properties();
-    props.put("annotators", "tokenize, ssplit, pos, lemma");
+    props.put("annotators", "tokenize,ssplit, pos, lemma");
 
     /*
      * This is a pipeline that takes in a string and returns various analyzed linguistic forms. 
@@ -47,11 +50,21 @@ public StanfordLemmatizer() {
     this.pipeline = new StanfordCoreNLP(props);
 }
 
-public List<String> lemmatize(String documentText)
+public List<ProcessedToken> lemmatize(int docId)
 {
-    List<String> lemmas = new LinkedList<String>();
+	String filePath = new String();
+	filePath = "/home/rishabh/Downloads/Information Retrieval/Assignment 1/reuters/test/" + Integer.toString(docId);
+	String contents = null;
+	try {
+		contents = new String(Files.readAllBytes(Paths.get(filePath)));
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+    int wordNumber = 1;
+	List<ProcessedToken> lemmas = new LinkedList<ProcessedToken>();
     // Create an empty Annotation just with the given textd
-    Annotation document = new Annotation(documentText);
+    Annotation document = new Annotation(contents);
     // run all Annotators on this text
     this.pipeline.annotate(document);
     // Iterate over all of the sentences found
@@ -61,7 +74,9 @@ public List<String> lemmatize(String documentText)
         for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
             // Retrieve and add the lemma for each word into the
             // list of lemmas
-            lemmas.add(token.get(LemmaAnnotation.class));
+            //lemmas.add(token.get(LemmaAnnotation.class));
+            lemmas.add(new ProcessedToken(token.get(LemmaAnnotation.class),docId , wordNumber));
+            wordNumber ++;
         }
     }
     return lemmas;
