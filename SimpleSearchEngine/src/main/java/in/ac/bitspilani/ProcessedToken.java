@@ -16,6 +16,7 @@ public class ProcessedToken {
 	public void setDocId(int docId) {
 		this.docId = docId;
 	}
+	
 	public int getWordNumber() {
 		return wordNumber;
 	}
